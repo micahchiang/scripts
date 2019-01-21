@@ -1,0 +1,2 @@
+#A script used for notifying whichever channel you choose of logins to a server.#
+curl -sS -H 'Content-type: application/json' --data-ascii "{\"username\":\"yourusername\",\"channel\":\"#yourchannel\",\"icon_emoji\":\":your_emoji:\",\"attachments\":[{\"text\":\"User $USER just logged in to `hostname` from `echo $SSH_CLIENT | cut -d ' ' -f 1`\",\"color\":\"warning\"}],\"message_format\":\"html\",\"notify\":false}" <YOUR SLACK WEBHOOK HERE>
