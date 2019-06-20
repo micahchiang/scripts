@@ -18,19 +18,11 @@ echo "Installing dependencies..."
 
 npm install react react-dom @reach/router react-test-renderer
 
-echo "Do you want to use Redux for state management? (y/n)" 
-
-read -r useRedux
-
-if [[ $useRedux =~ ^([yY][eE][sS]|[yY])$ ]]; then
-	npm install redux redux-thunk react-redux
-fi
-
 echo "Done..."
 
 echo "Installing DevDependencies..."
 
-npm install -D babel-core babel-eslint babel-plugin-transform-class-properties babel-plugin-transform-es2015-modules-commonjs babel-preset-env babel-preset-react eslint eslint-config-prettier eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-prettier eslint-plugin-react jest parcel-bundler prettier
+npm install -D babel-core babel-eslint babel-plugin-proposal-class-properties babel-preset-env babel-preset-react eslint eslint-config-prettier eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-prettier eslint-plugin-react eslint-plugin-react-hooks jest parcel-bundler prettier
 
 echo "Done..."
 
@@ -38,23 +30,8 @@ echo "Setting up Babel config..."
 
 cat << EOF > .babelrc
 {
-  "presets": [
-    "react",
-    [
-      "env",
-      {
-        "targets": {
-          "browsers": ["last 2 versions"]
-        }
-      }
-    ]
-  ],
-  "plugins": ["transform-class-properties"],
-  "env": {
-    "test": {
-      "plugins": ["transform-es2015-modules-commonjs"],
-    }
-  }
+  "presets": ["@babel/preset-react", "@babel/preset-env"],
+  "plugins": ["@babel/plugin-proposal-class-properties"]
 }
 EOF
 
@@ -82,8 +59,9 @@ cat << EOF > .eslintrc.json
   ],
   "rules": {
     "react/prop-types": 0,
+    "react-hooks/rules-of-hooks": "error",
     "jsx-a11y/label-has-for": 0,
-    "no-console": 1
+    "no-console": "warn"
   },
   "plugins": ["react", "import", "jsx-a11y"],
   "parser": "babel-eslint",
@@ -144,75 +122,22 @@ EOF
 # unit tests and redux directories
 mkdir __tests__
 
-# if Redux is used create store and other redux directories.
-if [[ $useRedux =~ ^([yY][eE][sS]|[yY])$ ]]; then
-
-mkdir actionCreators
-mkdir reducers
-
-# store.js
-cat << EOF > store.js
-import { createStore, compose, applyMiddleware } from "redux";
-import thunk from "redux-thunk";
-import reducer from "./reducers";
-
-const store = createStore(
-  reducer,
-  compose(
-    applyMiddleware(thunk),
-    typeof window === "object" &&
-      typeof window.devToolsExtension !== "undefined"
-      ? window.devToolsExtension()
-      : f => f
-  )
-);
-
-export default store;
-EOF
-
-# App.js
-cat << EOF > App.js
-import React from "react";
-import { render } from "react-dom";
-import { Router } from "@reach/router";
-import { Provider } from "react-redux";
-import store from "./store";
-
-class App extends React.Component {
-
-	render() {
-		return (
-			<div>
-				<Provider store={store}>
-					<Router></Router>
-				</Provider>
-			</div>
-		)
-	}
-}
-
-render(<App />, document.getElementById("root"));
-EOF
-else 
+# create App.js
 cat << EOF > App.js
 import React from "react";
 import { render } from "react-dom";
 import { Router } from "@reach/router";
 
-class App extends React.Component {
+const App = () => {
+	return (
+		<div>
+			<Router></Router>
+		</div>
+	);
+};
 
-        render() {
-                return (
-                        <div>
-                            <Router></Router>
-                        </div>
-                )
-        }
-}
-
-render(<App />, document.getElementById("root"));
+render(React.createElement(App), document.getElementById("root"));
 EOF
-fi
 
 echo "Done setting up src..."
 
@@ -231,13 +156,12 @@ sed "7d" package.json > package-new.json
 
 cat << EOF > tests.txt
     "test": "jest --silent",
-    "test-update": "jest --silent -u",
+    "clear-build-cache": "rm -rf .cache/ dist/",
     "format": "prettier --write \"src/**/*.{js,jsx,css,json} \" ",
     "format-check": "prettier --list-different \"src/**/*.{js,jsx,css,json} \" ",
     "lint": "eslint \"src/**/*.{js,jsx}\"",
     "dev": "parcel src/index.html",
     "build": "parcel build --public-url ./dist/ src/index.html",
-    "start": "npm run build && babel-node server.js"
 EOF
 
 sed "6 r tests.txt" package-new.json > package-w-scripts.json
