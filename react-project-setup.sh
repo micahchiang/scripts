@@ -22,7 +22,7 @@ echo "Done..."
 
 echo "Installing DevDependencies..."
 
-npm install -D babel-core babel-eslint babel-plugin-proposal-class-properties babel-preset-env babel-preset-react eslint eslint-config-prettier eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-prettier eslint-plugin-react eslint-plugin-react-hooks jest parcel-bundler prettier
+npm install -D @babel/core babel-eslint @babel/plugin-proposal-class-properties @babel/preset-env @babel/preset-react eslint eslint-config-prettier eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-prettier eslint-plugin-react eslint-plugin-react-hooks jest parcel-bundler prettier
 
 echo "Done..."
 
@@ -127,16 +127,35 @@ cat << EOF > App.js
 import React from "react";
 import { render } from "react-dom";
 import { Router } from "@reach/router";
+import AppBody from "./AppBody";
 
 const App = () => {
 	return (
 		<div>
-			<Router></Router>
+			<Router>
+				<AppBody path="/"></AppBody>
+			</Router>
 		</div>
 	);
 };
 
 render(React.createElement(App), document.getElementById("root"));
+EOF
+
+# create AppBody Component
+cat << EOF >> AppBody.js
+import React from "react";
+
+const AppBody = () => {
+	return (
+		<div>
+			<h3>This is AppBody</h3>
+		</div>
+	);
+};
+
+export default AppBody;
+
 EOF
 
 echo "Done setting up src..."
@@ -161,7 +180,7 @@ cat << EOF > tests.txt
     "format-check": "prettier --list-different \"src/**/*.{js,jsx,css,json} \" ",
     "lint": "eslint \"src/**/*.{js,jsx}\"",
     "dev": "parcel src/index.html",
-    "build": "parcel build --public-url ./dist/ src/index.html",
+    "build": "parcel build --public-url ./dist/ src/index.html"
 EOF
 
 sed "6 r tests.txt" package-new.json > package-w-scripts.json
