@@ -143,7 +143,7 @@ render(React.createElement(App), document.getElementById("root"));
 EOF
 
 # create AppBody Component
-cat << EOF >> AppBody.js
+cat << EOF > AppBody.js
 import React from "react";
 
 const AppBody = () => {
