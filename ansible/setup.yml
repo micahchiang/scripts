@@ -1,0 +1,59 @@
+- name: Set up new machine
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    dotfiles_dir: "{{ ansible_env.HOME }}/dotfiles"
+
+  tasks:
+    - name: Install core packages
+      package:
+        name: [git, vim]
+        state: present
+
+    - name: Clone dotfiles
+      git:
+        repo: 'https://github.com/micahchiang/dotfiles.git'
+        dest: "{{ dotfiles_dir }}"
+        version: main
+
+    - name: Find dotfiles and chuck'em in the register
+      find:
+        paths: "{{ dotfiles_dir }}"
+        file_type: file
+        patterns: ".*"
+        depth: 1
+      register: found_dotfiles
+    
+    - name: Symlink dotfiles
+      file:
+        src: "{{ item.path }}"
+        dest: "{{ ansible_env.HOME }}/{{ item.path | basename }}"
+        state: link
+        force: yes
+      loop: "{{ found_dotfiles.files }}"
+      when: "(item.path | basename) != '.git'"
+
+    - name: Install NVM
+      shell: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+      args:
+        creates: "{{ ansible_env.HOME }}/.nvm"
+
+    - name: Install latest stable node
+      shell: |
+        source {{ ansible_env.HOME }}/.nvm/nvm.sh
+        nvm install node
+        nvm alias default node
+      args:
+        executable: /bin/bash
+        creates: "{{ ansible_env.HOME }}/.nvm/versions/node"
+
+    - name: Install Python 3 and pip
+      package:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
