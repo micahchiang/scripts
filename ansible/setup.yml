@@ -9,7 +9,7 @@
   tasks:
     - name: Install core packages
       package:
-        name: [git, vim]
+        name: [git, vim, tmux]
         state: present
 
     - name: Clone dotfiles
@@ -56,4 +56,20 @@
           - python3
           - python3-pip
         state: present
+
+    - name: Add vim repo and update
+      shell: |
+        add-apt-repository ppa:jonathonf/vim
+        apt update
+        apt install vim
+
+    - name: Install starship
+      shell: |
+        curl -sS https://starship.rs/install.sh | sh
+
+    - name: Add starship to bashrc
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: 'eval "$(starship init bash)"'
+        create: yes
 
