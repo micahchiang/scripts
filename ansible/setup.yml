@@ -1,5 +1,7 @@
 - name: Set up new machine
   hosts: localhost
+  roles:
+    - geerlingguy.docker
   connection: local
   become: true
 
