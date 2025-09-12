@@ -43,6 +43,10 @@
       args:
         creates: "{{ ansible_env.HOME }}/.nvm"
 
+    - name: Install UV
+      shell: | 
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+
     - name: Install latest stable node
       shell: |
         source {{ ansible_env.HOME }}/.nvm/nvm.sh
