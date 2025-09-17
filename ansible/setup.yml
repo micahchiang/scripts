@@ -1,7 +1,5 @@
 - name: Set up new machine
   hosts: localhost
-  roles:
-    - geerlingguy.docker
   connection: local
   become: true
 
@@ -37,9 +35,10 @@
       loop: "{{ found_dotfiles.files }}"
       when: "(item.path | basename) != '.git'"
 
-    - name: Install NVM
-      shell: |
+    - name: Install nvm 
+      shell: > 
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+        source ~/.bashrc
       args:
         creates: "{{ ansible_env.HOME }}/.nvm"
 
@@ -68,14 +67,4 @@
         add-apt-repository ppa:jonathonf/vim
         apt update
         apt install vim
-
-    - name: Install starship
-      shell: |
-        curl -sS https://starship.rs/install.sh | sh
-
-    - name: Add starship to bashrc
-      lineinfile:
-        path: "{{ ansible_env.HOME }}/.bashrc"
-        line: 'eval "$(starship init bash)"'
-        create: yes
 
